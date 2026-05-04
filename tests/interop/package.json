@@ -1,0 +1,11 @@
+{
+  "name": "specodec-cpp-interop-test",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@typespec/compiler": "^1.11.0",
+    "@specodec/typespec-emitter-core": "^0.1.0",
+    "@specodec/typespec-emitter-cpp": "file:../../../typespec-emitter-cpp"
+  }
+}

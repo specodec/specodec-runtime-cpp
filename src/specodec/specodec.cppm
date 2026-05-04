@@ -1,0 +1,17 @@
+export module specodec;
+export import specodec.scodec_error;
+export import specodec.spec_reader;
+export import specodec.spec_writer;
+export import specodec.ryu.tables_f32;
+export import specodec.ryu.tables_f64;
+export import specodec.ryu.math;
+export import specodec.ryu.f32;
+export import specodec.ryu.f64;
+export import specodec.float_fmt;
+export import specodec.spec_codec;
+export import specodec.json_reader;
+export import specodec.json_writer;
+export import specodec.gron_reader;
+export import specodec.gron_writer;
+export import specodec.msgpack_reader;
+export import specodec.msgpack_writer;

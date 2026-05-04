@@ -1,0 +1,10 @@
+FROM dev:all AS builder
+WORKDIR /app
+ARG HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY all_proxy
+ENV PATH="/root/.local/share/mise/shims:$PATH"
+COPY build.sh ./
+COPY src/ src/
+COPY tests/ tests/
+RUN bash build.sh
+FROM scratch
+COPY --from=builder /app/build/libspecodec.a /out/
