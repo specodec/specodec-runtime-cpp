@@ -188,7 +188,7 @@ void testScalarUint64_max(int& passed, int& failed) {
     } catch (...) { failed++; std::cout << "FAIL uint64_max mp" << std::endl; }
 }
 
-void testScalarFloat32_1.5(int& passed, int& failed) {
+void testScalarFloat32_1_5(int& passed, int& failed) {
     try {
         auto data = readFile(vecDir + "/scalars/float32_1.5.mp");
         specodec::MsgPackReader r(data);
@@ -555,7 +555,7 @@ int main() {
     testScalarUint16_max(passed, failed);
     testScalarUint32_max(passed, failed);
     testScalarUint64_max(passed, failed);
-    testScalarFloat32_1.5(passed, failed);
+    testScalarFloat32_1_5(passed, failed);
     testScalarFloat32_neg_zero(passed, failed);
     testScalarFloat32_inf(passed, failed);
     testScalarFloat32_neg_inf(passed, failed);

@@ -14,7 +14,7 @@ const scalars = manifest.scalars || {};
 const modelNamespaces = manifest.modelNamespaces || {};
 
 function snake(s) { return s.replace(/\./g, "_").replace(/([A-Z])/g, (c, i) => (i > 0 ? "_" : "") + c.toLowerCase()); }
-function toPascalCase(name) { return name.replace(/\./g, '_').replace(/-/g, '_').charAt(0).toUpperCase() + name.slice(1); }
+function toPascalCase(name) { const r = name.replace(/\./g, '_').replace(/-/g, '_'); return r.charAt(0).toUpperCase() + r.slice(1); }
 
 function getReadMethod(type) {
   const map = { "int32":"readInt32","int64":"readInt64","uint32":"readUint32","uint64":"readUint64","float32":"readFloat32","float64":"readFloat64","string":"readString","bytes":"readBytes","bool":"readBool" };
