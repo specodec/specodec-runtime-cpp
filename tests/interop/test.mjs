@@ -17,7 +17,7 @@ function run(cmd) {
 console.log('\n=== Step 1: Install dependencies ===');
 run(`npm install`);
 
-if (!existsSync(join(CACHE, 'vectors'))) { console.log('\n=== Step 2: Clone tests repo ==='); if (existsSync(CACHE)) rmSync(CACHE, { recursive: true }); run(`git clone --depth=1 https://github.com/specodec/tests ${CACHE}`) } else { console.log('\n=== Step 2: Using cached .tests-cache ===') }
+console.log('\n=== Step 2: Using cached .tests-cache ===');
 
 console.log('\n=== Step 3: Generate vectors ===');
 run(`cd ${CACHE} && npm install --silent && node gen_types.mjs`);
@@ -73,8 +73,5 @@ for (const model of manifest.testModels || []) {
 }
 const total = match + mismatch;
 console.log(match + '/' + total + ' match, ' + mismatch + ' mismatch');
-if (mismatch > 0) process.exit(1);
-console.log('\n=== ALL PASSED ===');
-console.log(`${match}/${total} match, ${mismatch} mismatch`);
 if (mismatch > 0) process.exit(1);
 console.log('\n=== ALL PASSED ===');
