@@ -78,12 +78,21 @@ const runtimeObjs = readdirSync(BUILD).filter(f => f.startsWith('specodec') && f
 console.log('\n=== Step 3: Build generated alltypes module ===');
 const alltypesDir = EMIT_GEN;
 const alltypesFiles = existsSync(alltypesDir) ? readdirSync(alltypesDir).filter(f => f.endsWith('.cppm')) : [];
+const alltypesModules = [];
 if (alltypesFiles.length > 0) {
-  // Copy to build dir if needed
+  // Compile root module first (all_types_types.cppm) — child modules import it
+  const rootFile = alltypesFiles.find(f => f.endsWith('_types_types.cppm'));
+  if (rootFile) {
+    const modName = rootFile.replace('_types.cppm', '');
+    compileModule(modName, join(alltypesDir, rootFile));
+    alltypesModules.push(modName);
+  }
   for (const f of alltypesFiles) {
+    if (f === rootFile) continue;
     const src = join(alltypesDir, f);
-    const name = f.replace('.cppm', '');
-    compileModule('alltypes', src);
+    const modName = f.replace('_types.cppm', '');
+    compileModule(modName, src);
+    alltypesModules.push(modName);
   }
 }
 
@@ -96,21 +105,29 @@ for (const f of cppFiles) {
   run(`${CXX} ${MFLAGS} -c ${src} -o ${obj}`);
 }
 
+// Compile test_{ns} modules first (main.cppm imports them)
+console.log('\n=== Step 4: Build test modules ===');
+const testFiles = existsSync(join(__dir, 'emit')) ? readdirSync(join(__dir, 'emit')).filter(f => f.startsWith('test_') && f.endsWith('.cppm')) : [];
+for (const f of testFiles) {
+  const modName = f.replace('.cppm', '');
+  compileModule(modName, join(__dir, 'emit', f));
+}
+
 // Build emit_runner module
-console.log('\n=== Step 4: Build emit_runner module ===');
+console.log('\n=== Step 5: Build emit_runner module ===');
 const mainSrc = join(__dir, 'emit', 'main.cppm');
 if (existsSync(mainSrc)) {
   compileModule('emit_runner', mainSrc);
 }
 
-console.log('\n=== Step 5: Link and run ===');
+console.log('\n=== Step 6: Link and run ===');
 const allObjs = readdirSync(BUILD).filter(f => f.endsWith('.o')).map(f => join(BUILD, f));
 const binary = join(BUILD, 'emit_runner');
 const linkCmd = `${CXX} ${MFLAGS} -L${LIBCXX_LIB} ${allObjs.join(' ')} -lc++ -o ${binary}`;
 console.log('  >', linkCmd);
 execSync(linkCmd, { stdio: 'inherit' });
 
-console.log('\n=== Step 6: Execute ===');
+console.log('\n=== Step 7: Execute ===');
 const runCmd = `VEC_DIR=${VEC_DIR} OUT_DIR=${OUT_DIR} LD_LIBRARY_PATH=${LIBCXX_LIB}:$LD_LIBRARY_PATH ${binary}`;
 console.log('  >', runCmd);
 try {
