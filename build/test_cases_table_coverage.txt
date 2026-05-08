@@ -1,1 +1,0 @@
-/home/ytr/Specodec/specodec-runtime-ts/tests/ryu/test_cases_table_coverage.txt

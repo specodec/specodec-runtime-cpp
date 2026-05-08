@@ -1,0 +1,14 @@
+build/
+node_modules/
+__pycache__/
+*.o
+*.pcm
+*.a
+*.so
+*.dylib
+*.exe
+.cache/
+.DS_Store
+*.swp
+*.swo
+*~

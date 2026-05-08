@@ -1,1 +1,0 @@
-/home/ytr/Specodec/specodec-runtime-ts/tests/ryu/expected_f64.txt
