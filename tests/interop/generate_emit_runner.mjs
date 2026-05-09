@@ -12,6 +12,9 @@ const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
 const models = manifest.testModels || [];
 const scalars = manifest.scalars || {};
 const modelNamespaces = manifest.modelNamespaces || {};
+const testUnions = new Set(manifest.testUnions || []);
+function isUnionTest(name) { return testUnions.has(name); }
+function unionNameOf(testName) { return testName.replace(/_[^_]+$/, ''); }
 
 function snake(s) { return s.replace(/\./g, "_").replace(/([A-Z])/g, (c, i) => (i > 0 ? "_" : "") + c.toLowerCase()); }
 function toPascalCase(name) { const r = name.replace(/\./g, '_').replace(/-/g, '_'); return r.charAt(0).toUpperCase() + r.slice(1); }
@@ -61,15 +64,16 @@ void testScalar${pascal}(int& passed, int& failed) {
 
 // ── Model test helpers ─────────────────────────────────────────────────────
 function modelTestFunc(model) {
+  const codecName = isUnionTest(model) ? unionNameOf(model) : model;
   return `
 void testModel${model}(int& passed, int& failed, const std::string& vecDir, const std::string& outDir) {
     // msgpack
     try {
         auto data = readFile(vecDir + "/${model}.msgpack");
         specodec::MsgPackReader r(data);
-        auto obj = ${model}Codec.decode(r);
+        auto obj = ${codecName}Codec.decode(r);
         specodec::MsgPackWriter w;
-        ${model}Codec.encode(w, obj);
+        ${codecName}Codec.encode(w, obj);
         writeFile(outDir + "/${model}.msgpack", w.toBytes());
         passed++;
     } catch (const std::exception& e) { std::cout << "FAIL ${model} mp: " << e.what() << std::endl; failed++; }
@@ -78,9 +82,9 @@ void testModel${model}(int& passed, int& failed, const std::string& vecDir, cons
     try {
         auto data = readFile(vecDir + "/${model}.json");
         specodec::JsonReader r(data);
-        auto obj = ${model}Codec.decode(r);
+        auto obj = ${codecName}Codec.decode(r);
         specodec::JsonWriter w;
-        ${model}Codec.encode(w, obj);
+        ${codecName}Codec.encode(w, obj);
         writeFile(outDir + "/${model}.json", w.toBytes());
         passed++;
     } catch (const std::exception& e) { std::cout << "FAIL ${model} json: " << e.what() << std::endl; failed++; }
@@ -89,9 +93,9 @@ void testModel${model}(int& passed, int& failed, const std::string& vecDir, cons
     try {
         auto data = readFile(vecDir + "/${model}.unformatted.json");
         specodec::JsonReader r(data);
-        auto obj = ${model}Codec.decode(r);
+        auto obj = ${codecName}Codec.decode(r);
         specodec::JsonWriter w;
-        ${model}Codec.encode(w, obj);
+        ${codecName}Codec.encode(w, obj);
         writeFile(outDir + "/${model}.unformatted.json", w.toBytes());
         passed++;
     } catch (const std::exception& e) { std::cout << "FAIL ${model} unformatted: " << e.what() << std::endl; failed++; }
@@ -100,9 +104,9 @@ void testModel${model}(int& passed, int& failed, const std::string& vecDir, cons
     try {
         auto data = readFile(vecDir + "/${model}.gron");
         specodec::GronReader r(data);
-        auto obj = ${model}Codec.decode(r);
+        auto obj = ${codecName}Codec.decode(r);
         specodec::GronWriter w;
-        ${model}Codec.encode(w, obj);
+        ${codecName}Codec.encode(w, obj);
         writeFile(outDir + "/${model}.gron", w.toBytes());
         passed++;
     } catch (const std::exception& e) { std::cout << "FAIL ${model} gron: " << e.what() << std::endl; failed++; }

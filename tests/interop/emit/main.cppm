@@ -19,6 +19,7 @@ import test_alltypes_edge;
 import test_alltypes_extra;
 import test_alltypes_nested;
 import test_alltypes_nested_deep;
+import test_alltypes_unions;
 
 static std::string getEnv(const char* name) { const char* val = std::getenv(name); return val ? val : ""; }
 
@@ -600,6 +601,7 @@ int main() {
     runAlltypes_extra(passed, failed, vecDir, outDir);
     runAlltypes_nested(passed, failed, vecDir, outDir);
     runAlltypes_nested_deep(passed, failed, vecDir, outDir);
+    runAlltypes_unions(passed, failed, vecDir, outDir);
 
     std::cout << "emit-cpp: " << passed << " passed, " << failed << " failed" << std::endl;
     return failed > 0 ? 1 : 0;

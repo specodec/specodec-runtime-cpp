@@ -46,6 +46,7 @@ function compileModule(moduleName, src) {
 
 // Order matters
 const runtimeModules = [
+  ['specodec.spec_undefined',     join(SRC, 'spec_undefined.cppm')],
   ['specodec.scodec_error',      join(SRC, 'scodec_error.cppm')],
   ['specodec.spec_reader',       join(SRC, 'spec_reader.cppm')],
   ['specodec.spec_writer',       join(SRC, 'spec_writer.cppm')],

@@ -18,6 +18,7 @@ import all_types_pairs;
 import all_types_recursive;
 import all_types_scalars;
 import all_types;
+import all_types_unions;
 import all_types_wide;
 
 using namespace all_types_arrays;
@@ -33,6 +34,7 @@ using namespace all_types_pairs;
 using namespace all_types_recursive;
 using namespace all_types_scalars;
 using namespace all_types;
+using namespace all_types_unions;
 using namespace all_types_wide;
 
 static std::vector<std::uint8_t> readFile(const std::string& path) {

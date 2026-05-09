@@ -1,0 +1,4 @@
+json = {};
+json.req = "world";
+json.optColor = "Blue";
+json.optPri = "Low";

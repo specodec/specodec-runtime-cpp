@@ -1,0 +1,6 @@
+json = {};
+json.nested = {};
+json.nested.color = "Green";
+json.nested.priority = "High";
+json.nested.label = "foo";
+json.tag = "Blue";

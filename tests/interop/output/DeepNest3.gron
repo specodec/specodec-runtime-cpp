@@ -1,7 +1,7 @@
 json = {};
 json.title = "world";
 json.point = {};
-json.point.x = -3.14159265358979E0;
+json.point.x = -3.141592653589793E0;
 json.point.y = 0E0;
 json.point.z = -0E0;
 json.value_range = {};

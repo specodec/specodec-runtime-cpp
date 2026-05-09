@@ -1,4 +1,5 @@
 export module specodec;
+export import specodec.spec_undefined;
 export import specodec.scodec_error;
 export import specodec.spec_reader;
 export import specodec.spec_writer;

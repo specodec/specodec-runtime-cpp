@@ -32,7 +32,9 @@ public:
     }
 
     const FormatEntry& match(const std::string& format) const {
+        std::cerr << "[match] looking for '" << format << "' in " << entries.size() << " entries" << std::endl;
         for (const auto& e : entries) {
+            std::cerr << "  entry: '" << e.name << "'" << std::endl;
             if (format == e.name) return e;
         }
         if (!entries.empty()) return entries[0];
@@ -40,7 +42,25 @@ public:
     }
 };
 
-export extern const FormatRegistry defaultRegistry;
+export inline const FormatRegistry& defaultRegistry() {
+    static const FormatRegistry reg = FormatRegistry()
+        .register_(FormatEntry{
+            "json",
+            []() { return std::make_unique<JsonWriter>(); },
+            [](const std::vector<std::uint8_t>& data) { return std::make_unique<JsonReader>(data); }
+        })
+        .register_(FormatEntry{
+            "msgpack",
+            []() { return std::make_unique<MsgPackWriter>(); },
+            [](const std::vector<std::uint8_t>& data) { return std::make_unique<MsgPackReader>(data); }
+        })
+        .register_(FormatEntry{
+            "gron",
+            []() { return std::make_unique<GronWriter>(); },
+            [](const std::vector<std::uint8_t>& data) { return std::make_unique<GronReader>(data); }
+        });
+    return reg;
+}
 
 export struct RespondResult {
     std::vector<std::uint8_t> body;
@@ -50,36 +70,21 @@ export struct RespondResult {
 export template<typename T>
 T dispatch(const SpecCodec<T>& codec, const std::vector<std::uint8_t>& body,
            const std::string& format,
-           const FormatRegistry& registry = defaultRegistry) {
+           const FormatRegistry& registry = defaultRegistry()) {
     const auto& fmt = registry.match(format);
-    return codec.decode(*fmt.newReader(body));
+    auto reader = fmt.newReader(body);
+    std::cerr << "[dispatch] fmt='" << fmt.name << "' reader=" << reader.get() << " vtable_beginObject=" << (void*)*(reinterpret_cast<void**>(reader.get())) << std::endl;
+    return codec.decode(*reader);
 }
 
 export template<typename T>
 RespondResult respond(const SpecCodec<T>& codec, const T& obj,
                       const std::string& format,
-                      const FormatRegistry& registry = defaultRegistry) {
+                      const FormatRegistry& registry = defaultRegistry()) {
     const auto& fmt = registry.match(format);
     auto w = fmt.newWriter();
     codec.encode(*w, obj);
     return {w->toBytes(), fmt.name};
 }
-
-const FormatRegistry defaultRegistry = FormatRegistry()
-    .register_(FormatEntry{
-        "json",
-        []() { return std::make_unique<JsonWriter>(); },
-        [](const std::vector<std::uint8_t>& data) { return std::make_unique<JsonReader>(data); }
-    })
-    .register_(FormatEntry{
-        "msgpack",
-        []() { return std::make_unique<MsgPackWriter>(); },
-        [](const std::vector<std::uint8_t>& data) { return std::make_unique<MsgPackReader>(data); }
-    })
-    .register_(FormatEntry{
-        "gron",
-        []() { return std::make_unique<GronWriter>(); },
-        [](const std::vector<std::uint8_t>& data) { return std::make_unique<GronReader>(data); }
-    });
 
 } // namespace specodec
