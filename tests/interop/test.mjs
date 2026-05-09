@@ -61,7 +61,7 @@ for (const [name] of Object.entries(manifest.scalars || {})) {
   if (readFileSync(exp).equals(readFileSync(act))) match++;
   else { mismatch++; console.log('MISMATCH: ' + name + '.mp'); }
 }
-for (const model of manifest.testModels || []) {
+for (const model of [...(manifest.testModels || []), ...(manifest.testUnions || [])]) {
   for (const [outExt, vecExt] of [['msgpack','msgpack'], ['json','json'], ['unformatted.json','json'], ['gron','gron']]) {
     const vec = join(VEC_DIR, model + '.' + vecExt);
     const out = join(OUT_DIR, model + '.' + outExt);

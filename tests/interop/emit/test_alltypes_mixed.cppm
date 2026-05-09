@@ -7,6 +7,7 @@ import std;
 import specodec;
 import all_types_arrays;
 import all_types_edge;
+import all_types_enums;
 import all_types_extra;
 import all_types_many;
 import all_types_mixed;
@@ -23,6 +24,7 @@ import all_types_wide;
 
 using namespace all_types_arrays;
 using namespace all_types_edge;
+using namespace all_types_enums;
 using namespace all_types_extra;
 using namespace all_types_many;
 using namespace all_types_mixed;
