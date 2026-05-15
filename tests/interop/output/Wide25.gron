@@ -3,7 +3,7 @@ json.f1 = 10000;
 json.f2 = 3000000000;
 json.f3 = "18446744073709551615";
 json.f4 = 3.14E0;
-json.f5 = -3.141592653589793E0;
+json.f5 = -3.14159265358979E0;
 json.f6 = "3q2+7w==";
 json.f7 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 json.f8 = true;

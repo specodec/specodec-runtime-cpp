@@ -1,2 +1,2 @@
 json = {};
-json.count = -100000;
+json.count = 0;

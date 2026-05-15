@@ -34,10 +34,10 @@ const srcDir = join(__dir, 'emit');
 if (!existsSync(srcDir)) mkdirSync(srcDir, { recursive: true });
 run(`VEC_DIR=${VEC_DIR} node generate_emit_runner.mjs`);
 
-console.log('\n=== Step 6: Build runtime (skip - run_test.mjs compiles from source) ===');
-const cppDir = join(__dir, '..', '..');
-  // build.sh requires module dependency ordering; run_test.mjs handles full compilation
-run(`cd ${cppDir} && bash build.sh || true`);
+console.log('\n=== Step 6: Fetch runtime from Forgejo generic registry ===');
+const cppUrl = "http://10.199.64.20:3000/api/packages/specodec/generic/specodec-runtime-cpp/1.0.0/libspecodec.a";
+run(`curl -sfL -o /tmp/libspecodec.a "${cppUrl}"`);
+
 
 // Set LD_LIBRARY_PATH so the binary can find libc++.so
 const LIBCXX_LIB = '/root/.local/share/mise/installs/conda-libcxx/21.1.8/lib';

@@ -4,4 +4,4 @@ json.price = {};
 json.price.amount = "0";
 json.price.currency = "test";
 json.inStock = false;
-json.rating = 2.718281828459045E0;
+json.rating = 2.718281828E0;

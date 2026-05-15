@@ -3,4 +3,4 @@ json.f1 = "AAEC";
 json.f2 = "/w==";
 json.f3 = "foo";
 json.f4 = -100000;
-json.f5 = -3.141592653589793E0;
+json.f5 = -3.14159265358979E0;

@@ -8,4 +8,4 @@ json.dst_addr.street = "world";
 json.dst_addr.city = "test";
 json.dst_addr.zip = "foo";
 json.distance = -0E0;
-json.duration = 2.718281828459045E0;
+json.duration = 2.718281828E0;

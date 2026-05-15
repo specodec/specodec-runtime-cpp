@@ -1,2 +1,2 @@
 json = {};
-json.number = -100000;
+json.number = 0;

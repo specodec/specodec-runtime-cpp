@@ -9,7 +9,7 @@ const EMIT_GEN = path.join(__dir, "emit_gen");
 const manifestPath = path.join(VEC_DIR, "manifest.json");
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
 
-const models = manifest.testModels || [];
+const models = [...(manifest.testModels || []), ...(manifest.testUnions || [])];
 const scalars = manifest.scalars || {};
 const modelNamespaces = manifest.modelNamespaces || {};
 const testUnions = new Set(manifest.testUnions || []);

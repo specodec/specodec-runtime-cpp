@@ -2,5 +2,5 @@ json = {};
 json.f1 = false;
 json.f2 = "test";
 json.f3 = -2147483648;
-json.f4 = 2.718281828459045E0;
+json.f4 = 2.718281828E0;
 json.f5 = 1000000000;

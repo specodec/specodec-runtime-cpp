@@ -1,4 +1,4 @@
 json = {};
 json.color = "Green";
 json.priority = "High";
-json.label = "foo";
+json.status = "Archived";

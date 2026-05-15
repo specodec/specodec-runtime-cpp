@@ -7,13 +7,17 @@ using namespace all_types;
 
 namespace all_types_unions {
 
-export using Shape = std::variant<Coord, Range32>;
+export struct ShapeCircle { Coord value; };
+export struct ShapeRect { Range32 value; };
+
+export using Shape = std::variant<specodec::Undefined, ShapeCircle, ShapeRect>;
 
 export inline void write_shape(specodec::SpecWriter& w, const Shape& obj) {
     w.beginObject(1);
     std::visit([&w](const auto& val) {
-        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, Coord>) { w.writeField("circle"); write_coord(w, val);; }
-        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, Range32>) { w.writeField("rect"); write_range32(w, val);; }
+        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, ShapeCircle>) { w.writeField("circle"); write_coord(w, val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, ShapeRect>) { w.writeField("rect"); write_range32(w, val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, specodec::Undefined>) { throw std::runtime_error("cannot encode Undefined"); }
     }, obj);
     w.endObject();
 }
@@ -25,8 +29,8 @@ export inline specodec::SpecCodec<Shape> ShapeCodec = {
         if (!r.hasNextField()) { r.endObject(); throw std::runtime_error("empty union Shape"); }
         auto field_name = r.readFieldName();
         Shape result;
-        if (field_name == "circle") { result = CoordCodec.decode(r); }
-        else if (field_name == "rect") { result = Range32Codec.decode(r); }
+        if (field_name == "circle") { result = ShapeCircle{CoordCodec.decode(r)}; }
+        else if (field_name == "rect") { result = ShapeRect{Range32Codec.decode(r)}; }
         else { throw std::runtime_error("unknown variant for union Shape"); }
         while (r.hasNextField()) { r.readFieldName(); r.skip(); }
         r.endObject();
@@ -34,13 +38,17 @@ export inline specodec::SpecCodec<Shape> ShapeCodec = {
     }
 };
 
-export using Ident = std::variant<std::string, std::int32_t>;
+export struct IdentName { std::string value; };
+export struct IdentNumber { std::int32_t value; };
+
+export using Ident = std::variant<specodec::Undefined, IdentName, IdentNumber>;
 
 export inline void write_ident(specodec::SpecWriter& w, const Ident& obj) {
     w.beginObject(1);
     std::visit([&w](const auto& val) {
-        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, std::string>) { w.writeField("name"); w.writeString(val);; }
-        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, std::int32_t>) { w.writeField("number"); w.writeInt32(val);; }
+        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, IdentName>) { w.writeField("name"); w.writeString(val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, IdentNumber>) { w.writeField("number"); w.writeInt32(val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, specodec::Undefined>) { throw std::runtime_error("cannot encode Undefined"); }
     }, obj);
     w.endObject();
 }
@@ -52,8 +60,8 @@ export inline specodec::SpecCodec<Ident> IdentCodec = {
         if (!r.hasNextField()) { r.endObject(); throw std::runtime_error("empty union Ident"); }
         auto field_name = r.readFieldName();
         Ident result;
-        if (field_name == "name") { result = r.readString(); }
-        else if (field_name == "number") { result = r.readInt32(); }
+        if (field_name == "name") { result = IdentName{r.readString()}; }
+        else if (field_name == "number") { result = IdentNumber{r.readInt32()}; }
         else { throw std::runtime_error("unknown variant for union Ident"); }
         while (r.hasNextField()) { r.readFieldName(); r.skip(); }
         r.endObject();
@@ -61,13 +69,17 @@ export inline specodec::SpecCodec<Ident> IdentCodec = {
     }
 };
 
-export using ResultMsg = std::variant<std::string, Label>;
+export struct ResultMsgOk { std::string value; };
+export struct ResultMsgErr { Label value; };
+
+export using ResultMsg = std::variant<specodec::Undefined, ResultMsgOk, ResultMsgErr>;
 
 export inline void write_result_msg(specodec::SpecWriter& w, const ResultMsg& obj) {
     w.beginObject(1);
     std::visit([&w](const auto& val) {
-        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, std::string>) { w.writeField("ok"); w.writeString(val);; }
-        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, Label>) { w.writeField("err"); write_label(w, val);; }
+        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, ResultMsgOk>) { w.writeField("ok"); w.writeString(val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, ResultMsgErr>) { w.writeField("err"); write_label(w, val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, specodec::Undefined>) { throw std::runtime_error("cannot encode Undefined"); }
     }, obj);
     w.endObject();
 }
@@ -79,8 +91,8 @@ export inline specodec::SpecCodec<ResultMsg> ResultMsgCodec = {
         if (!r.hasNextField()) { r.endObject(); throw std::runtime_error("empty union ResultMsg"); }
         auto field_name = r.readFieldName();
         ResultMsg result;
-        if (field_name == "ok") { result = r.readString(); }
-        else if (field_name == "err") { result = LabelCodec.decode(r); }
+        if (field_name == "ok") { result = ResultMsgOk{r.readString()}; }
+        else if (field_name == "err") { result = ResultMsgErr{LabelCodec.decode(r)}; }
         else { throw std::runtime_error("unknown variant for union ResultMsg"); }
         while (r.hasNextField()) { r.readFieldName(); r.skip(); }
         r.endObject();
@@ -88,14 +100,19 @@ export inline specodec::SpecCodec<ResultMsg> ResultMsgCodec = {
     }
 };
 
-export using Tagged = std::variant<std::string, double, bool>;
+export struct TaggedTag { std::string value; };
+export struct TaggedScore { double value; };
+export struct TaggedActive { bool value; };
+
+export using Tagged = std::variant<specodec::Undefined, TaggedTag, TaggedScore, TaggedActive>;
 
 export inline void write_tagged(specodec::SpecWriter& w, const Tagged& obj) {
     w.beginObject(1);
     std::visit([&w](const auto& val) {
-        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, std::string>) { w.writeField("tag"); w.writeString(val);; }
-        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, double>) { w.writeField("score"); w.writeFloat64(val);; }
-        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, bool>) { w.writeField("active"); w.writeBool(val);; }
+        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, TaggedTag>) { w.writeField("tag"); w.writeString(val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, TaggedScore>) { w.writeField("score"); w.writeFloat64(val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, TaggedActive>) { w.writeField("active"); w.writeBool(val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, specodec::Undefined>) { throw std::runtime_error("cannot encode Undefined"); }
     }, obj);
     w.endObject();
 }
@@ -107,9 +124,9 @@ export inline specodec::SpecCodec<Tagged> TaggedCodec = {
         if (!r.hasNextField()) { r.endObject(); throw std::runtime_error("empty union Tagged"); }
         auto field_name = r.readFieldName();
         Tagged result;
-        if (field_name == "tag") { result = r.readString(); }
-        else if (field_name == "score") { result = r.readFloat64(); }
-        else if (field_name == "active") { result = r.readBool(); }
+        if (field_name == "tag") { result = TaggedTag{r.readString()}; }
+        else if (field_name == "score") { result = TaggedScore{r.readFloat64()}; }
+        else if (field_name == "active") { result = TaggedActive{r.readBool()}; }
         else { throw std::runtime_error("unknown variant for union Tagged"); }
         while (r.hasNextField()) { r.readFieldName(); r.skip(); }
         r.endObject();
@@ -117,98 +134,21 @@ export inline specodec::SpecCodec<Tagged> TaggedCodec = {
     }
 };
 
-export using OptUnionHolder = std::variant<Shape, Ident>;
+export struct ScalarUnionS { std::string value; };
+export struct ScalarUnionI { std::int32_t value; };
+export struct ScalarUnionF { double value; };
+export struct ScalarUnionB { bool value; };
 
-export inline void write_opt_union_holder(specodec::SpecWriter& w, const OptUnionHolder& obj) {
-    w.beginObject(1);
-    std::visit([&w](const auto& val) {
-        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, Shape>) { w.writeField("shape"); write_shape(w, val);; }
-        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, Ident>) { w.writeField("id"); write_ident(w, val);; }
-    }, obj);
-    w.endObject();
-}
-
-export inline specodec::SpecCodec<OptUnionHolder> OptUnionHolderCodec = {
-    .encode = [](specodec::SpecWriter& w, const OptUnionHolder& obj) { write_opt_union_holder(w, obj); },
-    .decode = [](specodec::SpecReader& r) -> OptUnionHolder {
-        r.beginObject();
-        if (!r.hasNextField()) { r.endObject(); throw std::runtime_error("empty union OptUnionHolder"); }
-        auto field_name = r.readFieldName();
-        OptUnionHolder result;
-        if (field_name == "shape") { result = ShapeCodec.decode(r); }
-        else if (field_name == "id") { result = IdentCodec.decode(r); }
-        else { throw std::runtime_error("unknown variant for union OptUnionHolder"); }
-        while (r.hasNextField()) { r.readFieldName(); r.skip(); }
-        r.endObject();
-        return result;
-    }
-};
-
-export using MixedUnion = std::variant<Coord, std::string, std::int32_t>;
-
-export inline void write_mixed_union(specodec::SpecWriter& w, const MixedUnion& obj) {
-    w.beginObject(1);
-    std::visit([&w](const auto& val) {
-        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, Coord>) { w.writeField("point"); write_coord(w, val);; }
-        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, std::string>) { w.writeField("label"); w.writeString(val);; }
-        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, std::int32_t>) { w.writeField("count"); w.writeInt32(val);; }
-    }, obj);
-    w.endObject();
-}
-
-export inline specodec::SpecCodec<MixedUnion> MixedUnionCodec = {
-    .encode = [](specodec::SpecWriter& w, const MixedUnion& obj) { write_mixed_union(w, obj); },
-    .decode = [](specodec::SpecReader& r) -> MixedUnion {
-        r.beginObject();
-        if (!r.hasNextField()) { r.endObject(); throw std::runtime_error("empty union MixedUnion"); }
-        auto field_name = r.readFieldName();
-        MixedUnion result;
-        if (field_name == "point") { result = CoordCodec.decode(r); }
-        else if (field_name == "label") { result = r.readString(); }
-        else if (field_name == "count") { result = r.readInt32(); }
-        else { throw std::runtime_error("unknown variant for union MixedUnion"); }
-        while (r.hasNextField()) { r.readFieldName(); r.skip(); }
-        r.endObject();
-        return result;
-    }
-};
-
-export using NestedUnion = std::variant<ResultMsg, Shape>;
-
-export inline void write_nested_union(specodec::SpecWriter& w, const NestedUnion& obj) {
-    w.beginObject(1);
-    std::visit([&w](const auto& val) {
-        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, ResultMsg>) { w.writeField("result"); write_result_msg(w, val);; }
-        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, Shape>) { w.writeField("shape"); write_shape(w, val);; }
-    }, obj);
-    w.endObject();
-}
-
-export inline specodec::SpecCodec<NestedUnion> NestedUnionCodec = {
-    .encode = [](specodec::SpecWriter& w, const NestedUnion& obj) { write_nested_union(w, obj); },
-    .decode = [](specodec::SpecReader& r) -> NestedUnion {
-        r.beginObject();
-        if (!r.hasNextField()) { r.endObject(); throw std::runtime_error("empty union NestedUnion"); }
-        auto field_name = r.readFieldName();
-        NestedUnion result;
-        if (field_name == "result") { result = ResultMsgCodec.decode(r); }
-        else if (field_name == "shape") { result = ShapeCodec.decode(r); }
-        else { throw std::runtime_error("unknown variant for union NestedUnion"); }
-        while (r.hasNextField()) { r.readFieldName(); r.skip(); }
-        r.endObject();
-        return result;
-    }
-};
-
-export using ScalarUnion = std::variant<std::string, std::int32_t, double, bool>;
+export using ScalarUnion = std::variant<specodec::Undefined, ScalarUnionS, ScalarUnionI, ScalarUnionF, ScalarUnionB>;
 
 export inline void write_scalar_union(specodec::SpecWriter& w, const ScalarUnion& obj) {
     w.beginObject(1);
     std::visit([&w](const auto& val) {
-        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, std::string>) { w.writeField("s"); w.writeString(val);; }
-        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, std::int32_t>) { w.writeField("i"); w.writeInt32(val);; }
-        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, double>) { w.writeField("f"); w.writeFloat64(val);; }
-        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, bool>) { w.writeField("b"); w.writeBool(val);; }
+        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, ScalarUnionS>) { w.writeField("s"); w.writeString(val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, ScalarUnionI>) { w.writeField("i"); w.writeInt32(val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, ScalarUnionF>) { w.writeField("f"); w.writeFloat64(val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, ScalarUnionB>) { w.writeField("b"); w.writeBool(val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, specodec::Undefined>) { throw std::runtime_error("cannot encode Undefined"); }
     }, obj);
     w.endObject();
 }
@@ -220,14 +160,270 @@ export inline specodec::SpecCodec<ScalarUnion> ScalarUnionCodec = {
         if (!r.hasNextField()) { r.endObject(); throw std::runtime_error("empty union ScalarUnion"); }
         auto field_name = r.readFieldName();
         ScalarUnion result;
-        if (field_name == "s") { result = r.readString(); }
-        else if (field_name == "i") { result = r.readInt32(); }
-        else if (field_name == "f") { result = r.readFloat64(); }
-        else if (field_name == "b") { result = r.readBool(); }
+        if (field_name == "s") { result = ScalarUnionS{r.readString()}; }
+        else if (field_name == "i") { result = ScalarUnionI{r.readInt32()}; }
+        else if (field_name == "f") { result = ScalarUnionF{r.readFloat64()}; }
+        else if (field_name == "b") { result = ScalarUnionB{r.readBool()}; }
         else { throw std::runtime_error("unknown variant for union ScalarUnion"); }
         while (r.hasNextField()) { r.readFieldName(); r.skip(); }
         r.endObject();
         return result;
+    }
+};
+
+export struct OptUnionHolderShape { Shape value; };
+export struct OptUnionHolderId { Ident value; };
+
+export using OptUnionHolder = std::variant<specodec::Undefined, OptUnionHolderShape, OptUnionHolderId>;
+
+export inline void write_opt_union_holder(specodec::SpecWriter& w, const OptUnionHolder& obj) {
+    w.beginObject(1);
+    std::visit([&w](const auto& val) {
+        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, OptUnionHolderShape>) { w.writeField("shape"); write_shape(w, val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, OptUnionHolderId>) { w.writeField("id"); write_ident(w, val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, specodec::Undefined>) { throw std::runtime_error("cannot encode Undefined"); }
+    }, obj);
+    w.endObject();
+}
+
+export inline specodec::SpecCodec<OptUnionHolder> OptUnionHolderCodec = {
+    .encode = [](specodec::SpecWriter& w, const OptUnionHolder& obj) { write_opt_union_holder(w, obj); },
+    .decode = [](specodec::SpecReader& r) -> OptUnionHolder {
+        r.beginObject();
+        if (!r.hasNextField()) { r.endObject(); throw std::runtime_error("empty union OptUnionHolder"); }
+        auto field_name = r.readFieldName();
+        OptUnionHolder result;
+        if (field_name == "shape") { result = OptUnionHolderShape{ShapeCodec.decode(r)}; }
+        else if (field_name == "id") { result = OptUnionHolderId{IdentCodec.decode(r)}; }
+        else { throw std::runtime_error("unknown variant for union OptUnionHolder"); }
+        while (r.hasNextField()) { r.readFieldName(); r.skip(); }
+        r.endObject();
+        return result;
+    }
+};
+
+export struct MixedUnionPoint { Coord value; };
+export struct MixedUnionLabel { std::string value; };
+export struct MixedUnionCount { std::int32_t value; };
+
+export using MixedUnion = std::variant<specodec::Undefined, MixedUnionPoint, MixedUnionLabel, MixedUnionCount>;
+
+export inline void write_mixed_union(specodec::SpecWriter& w, const MixedUnion& obj) {
+    w.beginObject(1);
+    std::visit([&w](const auto& val) {
+        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, MixedUnionPoint>) { w.writeField("point"); write_coord(w, val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, MixedUnionLabel>) { w.writeField("label"); w.writeString(val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, MixedUnionCount>) { w.writeField("count"); w.writeInt32(val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, specodec::Undefined>) { throw std::runtime_error("cannot encode Undefined"); }
+    }, obj);
+    w.endObject();
+}
+
+export inline specodec::SpecCodec<MixedUnion> MixedUnionCodec = {
+    .encode = [](specodec::SpecWriter& w, const MixedUnion& obj) { write_mixed_union(w, obj); },
+    .decode = [](specodec::SpecReader& r) -> MixedUnion {
+        r.beginObject();
+        if (!r.hasNextField()) { r.endObject(); throw std::runtime_error("empty union MixedUnion"); }
+        auto field_name = r.readFieldName();
+        MixedUnion result;
+        if (field_name == "point") { result = MixedUnionPoint{CoordCodec.decode(r)}; }
+        else if (field_name == "label") { result = MixedUnionLabel{r.readString()}; }
+        else if (field_name == "count") { result = MixedUnionCount{r.readInt32()}; }
+        else { throw std::runtime_error("unknown variant for union MixedUnion"); }
+        while (r.hasNextField()) { r.readFieldName(); r.skip(); }
+        r.endObject();
+        return result;
+    }
+};
+
+export struct NestedUnionResult { ResultMsg value; };
+export struct NestedUnionShape { Shape value; };
+
+export using NestedUnion = std::variant<specodec::Undefined, NestedUnionResult, NestedUnionShape>;
+
+export inline void write_nested_union(specodec::SpecWriter& w, const NestedUnion& obj) {
+    w.beginObject(1);
+    std::visit([&w](const auto& val) {
+        if constexpr (std::is_same_v<std::decay_t<decltype(val)>, NestedUnionResult>) { w.writeField("result"); write_result_msg(w, val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, NestedUnionShape>) { w.writeField("shape"); write_shape(w, val.value);; }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(val)>, specodec::Undefined>) { throw std::runtime_error("cannot encode Undefined"); }
+    }, obj);
+    w.endObject();
+}
+
+export inline specodec::SpecCodec<NestedUnion> NestedUnionCodec = {
+    .encode = [](specodec::SpecWriter& w, const NestedUnion& obj) { write_nested_union(w, obj); },
+    .decode = [](specodec::SpecReader& r) -> NestedUnion {
+        r.beginObject();
+        if (!r.hasNextField()) { r.endObject(); throw std::runtime_error("empty union NestedUnion"); }
+        auto field_name = r.readFieldName();
+        NestedUnion result;
+        if (field_name == "result") { result = NestedUnionResult{ResultMsgCodec.decode(r)}; }
+        else if (field_name == "shape") { result = NestedUnionShape{ShapeCodec.decode(r)}; }
+        else { throw std::runtime_error("unknown variant for union NestedUnion"); }
+        while (r.hasNextField()) { r.readFieldName(); r.skip(); }
+        r.endObject();
+        return result;
+    }
+};
+
+export struct UnionFieldHolder {
+    Shape shape_;
+    Ident id_;
+};
+
+export inline void write_union_field_holder(specodec::SpecWriter& w, const UnionFieldHolder& obj) {
+    w.beginObject(2);
+    w.writeField("shape"); write_shape(w, obj.shape_);;
+    w.writeField("id"); write_ident(w, obj.id_);;
+    w.endObject();
+}
+
+export inline specodec::SpecCodec<UnionFieldHolder> UnionFieldHolderCodec = {
+    .encode = [](specodec::SpecWriter& w, const UnionFieldHolder& obj) { write_union_field_holder(w, obj); },
+    .decode = [](specodec::SpecReader& r) -> UnionFieldHolder {
+        Shape fld_shape = {};
+        Ident fld_id = {};
+        r.beginObject();
+        while (r.hasNextField()) {
+            auto field_name = r.readFieldName();
+            if (field_name == "shape") { fld_shape = ShapeCodec.decode(r); }
+            else if (field_name == "id") { fld_id = IdentCodec.decode(r); }
+            else { r.skip(); }
+        }
+        r.endObject();
+        return UnionFieldHolder{fld_shape, fld_id};
+    }
+};
+
+export struct OptUnionFieldHolder {
+    std::optional<Shape> shape_;
+    std::string name_;
+};
+
+export inline void write_opt_union_field_holder(specodec::SpecWriter& w, const OptUnionFieldHolder& obj) {
+    int field_count = 1;
+    if (obj.shape_.has_value()) field_count++;
+    w.beginObject(field_count);
+    if (obj.shape_.has_value()) { w.writeField("shape"); write_shape(w, obj.shape_.value());; }
+    w.writeField("name"); w.writeString(obj.name_);;
+    w.endObject();
+}
+
+export inline specodec::SpecCodec<OptUnionFieldHolder> OptUnionFieldHolderCodec = {
+    .encode = [](specodec::SpecWriter& w, const OptUnionFieldHolder& obj) { write_opt_union_field_holder(w, obj); },
+    .decode = [](specodec::SpecReader& r) -> OptUnionFieldHolder {
+        std::optional<Shape> fld_shape;
+        std::string fld_name = "";
+        r.beginObject();
+        while (r.hasNextField()) {
+            auto field_name = r.readFieldName();
+            if (field_name == "shape") { fld_shape = std::optional<Shape>{(r.isNull() ? (r.readNull(), std::optional<Shape>{std::nullopt}) : std::optional<Shape>{ShapeCodec.decode(r)})}; }
+            else if (field_name == "name") { fld_name = r.readString(); }
+            else { r.skip(); }
+        }
+        r.endObject();
+        return OptUnionFieldHolder{fld_shape, fld_name};
+    }
+};
+
+export struct UnionArrayHolder {
+    std::vector<Shape> shapes_;
+};
+
+export inline void write_union_array_holder(specodec::SpecWriter& w, const UnionArrayHolder& obj) {
+    w.beginObject(1);
+    w.writeField("shapes"); 
+        w.beginArray(obj.shapes_.size());
+        for (const auto& elem : obj.shapes_) { w.nextElement(); write_shape(w, elem); }
+        w.endArray();
+    w.endObject();
+}
+
+export inline specodec::SpecCodec<UnionArrayHolder> UnionArrayHolderCodec = {
+    .encode = [](specodec::SpecWriter& w, const UnionArrayHolder& obj) { write_union_array_holder(w, obj); },
+    .decode = [](specodec::SpecReader& r) -> UnionArrayHolder {
+        std::vector<Shape> fld_shapes = {};
+        r.beginObject();
+        while (r.hasNextField()) {
+            auto field_name = r.readFieldName();
+            if (field_name == "shapes") { fld_shapes = [&]() {
+    std::vector<Shape> result;
+    r.beginArray();
+    while (r.hasNextElement()) { result.push_back(ShapeCodec.decode(r)); }
+    r.endArray();
+    return result;
+}(); }
+            else { r.skip(); }
+        }
+        r.endObject();
+        return UnionArrayHolder{fld_shapes};
+    }
+};
+
+export struct UnionMixedHolder {
+    ResultMsg result_;
+    Tagged tag_;
+    std::int32_t count_;
+};
+
+export inline void write_union_mixed_holder(specodec::SpecWriter& w, const UnionMixedHolder& obj) {
+    w.beginObject(3);
+    w.writeField("result"); write_result_msg(w, obj.result_);;
+    w.writeField("tag"); write_tagged(w, obj.tag_);;
+    w.writeField("count"); w.writeInt32(obj.count_);;
+    w.endObject();
+}
+
+export inline specodec::SpecCodec<UnionMixedHolder> UnionMixedHolderCodec = {
+    .encode = [](specodec::SpecWriter& w, const UnionMixedHolder& obj) { write_union_mixed_holder(w, obj); },
+    .decode = [](specodec::SpecReader& r) -> UnionMixedHolder {
+        ResultMsg fld_result = {};
+        Tagged fld_tag = {};
+        std::int32_t fld_count = 0;
+        r.beginObject();
+        while (r.hasNextField()) {
+            auto field_name = r.readFieldName();
+            if (field_name == "result") { fld_result = ResultMsgCodec.decode(r); }
+            else if (field_name == "tag") { fld_tag = TaggedCodec.decode(r); }
+            else if (field_name == "count") { fld_count = r.readInt32(); }
+            else { r.skip(); }
+        }
+        r.endObject();
+        return UnionMixedHolder{fld_result, fld_tag, fld_count};
+    }
+};
+
+export struct UnionScalarHolder {
+    Ident id_;
+    ScalarUnion sc_;
+    std::string label_;
+};
+
+export inline void write_union_scalar_holder(specodec::SpecWriter& w, const UnionScalarHolder& obj) {
+    w.beginObject(3);
+    w.writeField("id"); write_ident(w, obj.id_);;
+    w.writeField("sc"); write_scalar_union(w, obj.sc_);;
+    w.writeField("label"); w.writeString(obj.label_);;
+    w.endObject();
+}
+
+export inline specodec::SpecCodec<UnionScalarHolder> UnionScalarHolderCodec = {
+    .encode = [](specodec::SpecWriter& w, const UnionScalarHolder& obj) { write_union_scalar_holder(w, obj); },
+    .decode = [](specodec::SpecReader& r) -> UnionScalarHolder {
+        Ident fld_id = {};
+        ScalarUnion fld_sc = {};
+        std::string fld_label = "";
+        r.beginObject();
+        while (r.hasNextField()) {
+            auto field_name = r.readFieldName();
+            if (field_name == "id") { fld_id = IdentCodec.decode(r); }
+            else if (field_name == "sc") { fld_sc = ScalarUnionCodec.decode(r); }
+            else if (field_name == "label") { fld_label = r.readString(); }
+            else { r.skip(); }
+        }
+        r.endObject();
+        return UnionScalarHolder{fld_id, fld_sc, fld_label};
     }
 };
 
